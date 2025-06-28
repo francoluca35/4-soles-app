@@ -1,7 +1,7 @@
 'use client';
 import { useEffect } from 'react';
 import Image from 'next/image';
-import logo from '../../public/Assets/4-soles-logo.jpg';
+import logo from '@/assets/logo-4soles.png';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {

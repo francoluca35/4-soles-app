@@ -1,0 +1,27 @@
+'use client';
+import { useState } from 'react';
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async () => {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    alert(data.message || data.error);
+  };
+
+  return (
+    <div className="p-4 max-w-sm mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Iniciar sesión</h1>
+      <input className="w-full p-2 border mb-2" type="email" placeholder="Email" onChange={e => setEmail(e.target.value)} />
+      <input className="w-full p-2 border mb-2" type="password" placeholder="Contraseña" onChange={e => setPassword(e.target.value)} />
+      <button className="w-full bg-blue-900 text-white p-2" onClick={handleLogin}>Entrar</button>
+      <p className='text-center'>¿Aún no tenes cuenta?, <a href='/register'>Registrate</a></p>
+    </div>
+  );
+}
