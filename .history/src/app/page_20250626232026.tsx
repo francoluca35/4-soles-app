@@ -17,7 +17,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#852123]">
-      <div className="relative w-[250px] h-[250px] sm:w-[300px] sm:h-[300px]">
+      <div className="relative w-[550px] h-[550px] sm:w-[800px] sm:h-[300px]">
         <Image
           src={logo}
           alt="Logo 4 Soles"
