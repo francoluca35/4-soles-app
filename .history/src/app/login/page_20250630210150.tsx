@@ -7,16 +7,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 export default function LoginPage() {
-  const { user, setUser } = useAuth();
+  const { user, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
   useEffect(() => {
-    if (user) {
-      // redirige automáticamente después del login
-      router.replace(`/${user.rol}home`);
+    if (!loading && (!user || user.rol !== "admin")) {
+      router.replace("/login");
     }
-  }, [user]);
+  }, [user, loading]);
+
+  if (loading) return <div className="text-white p-4">Cargando...</div>; // 👈 mientras verifica sesión
+
+  if (!user || user.rol !== "admin") return null;
   const handleLogin = async () => {
     const res = await fetch("/api/auth/login", {
       method: "POST",
@@ -27,7 +30,11 @@ export default function LoginPage() {
     const data = await res.json();
 
     if (res.ok && data.rol) {
-      setUser(data); // 👉 ACTUALIZA EL CONTEXTO GLOBAL
+      // Redirigir según rol
+      if (data.rol === "admin") router.push("/adminhome");
+      else if (data.rol === "caja") router.push("/cajahome");
+      else if (data.rol === "repartidor") router.push("/repartidorhome");
+      else alert("Rol no reconocido");
     } else {
       alert(data.error || "Credenciales incorrectas");
     }

@@ -3,7 +3,7 @@ import { connectDB } from '@/lib/bd';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-
+import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   try {
@@ -18,22 +18,12 @@ export async function POST(req: Request) {
 
     const token = jwt.sign({ userId: user._id, rol: user.rol }, process.env.JWT_SECRET!, { expiresIn: "7d" });
 
-    const response = NextResponse.json({
-      message: "Login exitoso",
-      token,
-      rol: user.rol,
-    });
-    
-    response.cookies.set({
-      name: "token",
-      value: token,
+    // 👉 Guardar token en cookie
+    cookies().set("token", token, {
       httpOnly: true,
       path: "/",
       maxAge: 60 * 60 * 24 * 7, // 7 días
     });
-    
-    return response;
-    
     
     return NextResponse.json({ message: "Login exitoso", token, rol: user.rol });
     

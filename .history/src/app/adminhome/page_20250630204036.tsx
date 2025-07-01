@@ -8,7 +8,7 @@ import logo from "../../../public/Assets/4-soles-logo.jpg";
 import Sidebar from "../components/ui/Sidebar";
 
 export default function AdminHome() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [fecha, setFecha] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();

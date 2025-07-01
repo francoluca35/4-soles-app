@@ -1,29 +1,20 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
 import PanelBoton from "../components/ui/PanelBoton";
 import Image from "next/image";
 import logo from "../../../public/Assets/4-soles-logo.jpg";
 import Sidebar from "../components/ui/Sidebar";
 
+import { useRouter } from "next/navigation";
+
 export default function AdminHome() {
-  const { user } = useAuth();
   const [fecha, setFecha] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
-
   useEffect(() => {
     const hoy = new Date();
     setFecha(hoy.toLocaleDateString("es-AR"));
   }, []);
-
-  useEffect(() => {
-    if (!user) return; // loading
-    if (user.rol !== "admin") router.replace("/login");
-  }, [user]);
-
-  if (!user || user.rol !== "admin") return null; // bloquea la vista hasta que valide
 
   return (
     <div className="min-h-screen bg-[#852123] relative px-4 py-6 text-white overflow-hidden">

@@ -3,7 +3,7 @@ import { connectDB } from '@/lib/bd';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-
+import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   try {

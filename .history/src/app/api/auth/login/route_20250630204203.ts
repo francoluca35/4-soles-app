@@ -3,7 +3,7 @@ import { connectDB } from '@/lib/bd';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-
+import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   try {
@@ -16,30 +16,22 @@ export async function POST(req: Request) {
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) return NextResponse.json({ error: 'Contraseña incorrecta' }, { status: 401 });
 
-    const token = jwt.sign({ userId: user._id, rol: user.rol }, process.env.JWT_SECRET!, { expiresIn: "7d" });
-
-    const response = NextResponse.json({
-      message: "Login exitoso",
-      token,
-      rol: user.rol,
-    });
-    
-    response.cookies.set({
-      name: "token",
-      value: token,
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET!, { expiresIn: '7d' });
+    cookies().set("token", token, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 días
+      maxAge: 60 * 60 * 24 * 7,
     });
-    
+    const response = NextResponse.json({ message: 'Login exitoso', rol: user.rol });
+    response.cookies.set('token', token, {
+      httpOnly: true,
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
     return response;
-    
-    
-    return NextResponse.json({ message: "Login exitoso", token, rol: user.rol });
-    
-
-
-
   } catch (err) {
     console.error("Error en login:", err);
     return NextResponse.json({ error: 'Error al iniciar sesión' }, { status: 500 });

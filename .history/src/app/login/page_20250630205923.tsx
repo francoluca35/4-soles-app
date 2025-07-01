@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 export default function LoginPage() {
-  const { user, setUser } = useAuth();
+  const { user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
@@ -27,7 +27,11 @@ export default function LoginPage() {
     const data = await res.json();
 
     if (res.ok && data.rol) {
-      setUser(data); // 👉 ACTUALIZA EL CONTEXTO GLOBAL
+      // Redirigir según rol
+      if (data.rol === "admin") router.push("/adminhome");
+      else if (data.rol === "caja") router.push("/cajahome");
+      else if (data.rol === "repartidor") router.push("/repartidorhome");
+      else alert("Rol no reconocido");
     } else {
       alert(data.error || "Credenciales incorrectas");
     }
