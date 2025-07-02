@@ -17,7 +17,7 @@ import BuscadorYLista from "./BuscadorYLista";
 
 export default function AddProductosForm() {
   const [modo, setModo] = useState<"agregar" | "editar">("agregar");
-
+  const [id, setId] = useState("");
   const [nombre, setNombre] = useState("");
   const [precio, setPrecio] = useState("");
   const [tipo, setTipo] = useState("comidas");
@@ -85,7 +85,7 @@ export default function AddProductosForm() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            id: productoSeleccionadoId, // ⚠️ <=== ESTO FALTABA
+            id: productoSeleccionadoId,
             tipo,
             categoria,
             producto: {
@@ -183,24 +183,11 @@ export default function AddProductosForm() {
               productos={productos}
               onSelect={(producto) => {
                 console.log("Producto seleccionado:", producto);
-                setProductoSeleccionadoId(producto._id); // ✅ Este es el ID que falta
+                setProductoSeleccionadoId(producto._id);
                 setNombre(producto.nombre);
                 setPrecio(producto.precio.toString());
                 setCategoria(producto.categoria);
                 setPreviewURL(producto.imagen);
-              }}
-              onDeleteSelected={async (ids) => {
-                await fetch("/api/menu/eliminar", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ ids, tipo, categoria }),
-                });
-
-                Swal.fire("Productos eliminados", "", "success");
-
-                fetch(`/api/menu/listar?tipo=${tipo}`)
-                  .then((res) => res.json())
-                  .then((data) => setProductos(data));
               }}
             />
 
@@ -233,6 +220,64 @@ export default function AddProductosForm() {
                   Imagen subida: {imagenURL}
                 </p>
               )}
+              <button
+                onClick={async () => {
+                  if (!productoSeleccionadoId || !tipo || !categoria) {
+                    Swal.fire(
+                      "Faltan datos",
+                      "Seleccioná un producto antes de eliminar",
+                      "error"
+                    );
+                    return;
+                  }
+
+                  const confirmar = await Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: "Esto eliminará el producto",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, eliminar",
+                  });
+
+                  if (confirmar.isConfirmed) {
+                    console.log("Intentando eliminar:", {
+                      id: productoSeleccionadoId,
+                      tipo,
+                      categoria,
+                    });
+
+                    const res = await fetch("/api/menu/eliminar", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        id: productoSeleccionadoId,
+                        tipo,
+                        categoria,
+                      }),
+                    });
+
+                    const data = await res.json();
+                    if (res.ok) {
+                      Swal.fire("Eliminado", "", "success");
+                      setNombre("");
+                      setPrecio("");
+                      setCategoria("");
+                      setImagen(null);
+                      setPreviewURL("");
+                      setProductoSeleccionadoId("");
+
+                      fetch(`/api/menu/listar?tipo=${tipo}`)
+                        .then((res) => res.json())
+                        .then((data) => setProductos(data));
+                    } else {
+                      Swal.fire(data.error || "Error al eliminar", "", "error");
+                    }
+                  }
+                }}
+                className="bg-red-600 text-white px-4 py-2 rounded mt-4"
+              >
+                Eliminar producto
+              </button>
             </div>
           </div>
         )}

@@ -190,17 +190,14 @@ export default function AddProductosForm() {
                 setPreviewURL(producto.imagen);
               }}
               onDeleteSelected={async (ids) => {
-                await fetch("/api/menu/eliminar", {
+                // llamada al backend para eliminar todos esos ids
+                await fetch("/api/menu/eliminar-multiples", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ ids, tipo, categoria }),
                 });
-
                 Swal.fire("Productos eliminados", "", "success");
-
-                fetch(`/api/menu/listar?tipo=${tipo}`)
-                  .then((res) => res.json())
-                  .then((data) => setProductos(data));
+                refetchLista();
               }}
             />
 

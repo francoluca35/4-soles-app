@@ -17,7 +17,7 @@ import BuscadorYLista from "./BuscadorYLista";
 
 export default function AddProductosForm() {
   const [modo, setModo] = useState<"agregar" | "editar">("agregar");
-
+  const [id, setId] = useState("");
   const [nombre, setNombre] = useState("");
   const [precio, setPrecio] = useState("");
   const [tipo, setTipo] = useState("comidas");
@@ -85,7 +85,7 @@ export default function AddProductosForm() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            id: productoSeleccionadoId, // ⚠️ <=== ESTO FALTABA
+            id: productoSeleccionadoId,
             tipo,
             categoria,
             producto: {
@@ -183,24 +183,11 @@ export default function AddProductosForm() {
               productos={productos}
               onSelect={(producto) => {
                 console.log("Producto seleccionado:", producto);
-                setProductoSeleccionadoId(producto._id); // ✅ Este es el ID que falta
+                setProductoSeleccionadoId(producto._id);
                 setNombre(producto.nombre);
                 setPrecio(producto.precio.toString());
-                setCategoria(producto.categoria);
+                setCategoria(producto.categoria ?? "");
                 setPreviewURL(producto.imagen);
-              }}
-              onDeleteSelected={async (ids) => {
-                await fetch("/api/menu/eliminar", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ ids, tipo, categoria }),
-                });
-
-                Swal.fire("Productos eliminados", "", "success");
-
-                fetch(`/api/menu/listar?tipo=${tipo}`)
-                  .then((res) => res.json())
-                  .then((data) => setProductos(data));
               }}
             />
 

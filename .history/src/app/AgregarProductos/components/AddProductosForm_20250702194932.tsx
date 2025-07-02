@@ -85,7 +85,7 @@ export default function AddProductosForm() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            id: productoSeleccionadoId, // ⚠️ <=== ESTO FALTABA
+            id: productoSeleccionadoId, // ← este es clave
             tipo,
             categoria,
             producto: {
@@ -188,19 +188,6 @@ export default function AddProductosForm() {
                 setPrecio(producto.precio.toString());
                 setCategoria(producto.categoria);
                 setPreviewURL(producto.imagen);
-              }}
-              onDeleteSelected={async (ids) => {
-                await fetch("/api/menu/eliminar", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ ids, tipo, categoria }),
-                });
-
-                Swal.fire("Productos eliminados", "", "success");
-
-                fetch(`/api/menu/listar?tipo=${tipo}`)
-                  .then((res) => res.json())
-                  .then((data) => setProductos(data));
               }}
             />
 

@@ -190,7 +190,7 @@ export default function AddProductosForm() {
                 setPreviewURL(producto.imagen);
               }}
               onDeleteSelected={async (ids) => {
-                await fetch("/api/menu/eliminar", {
+                await fetch("/api/menu/eliminar-multiples", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ ids, tipo, categoria }),

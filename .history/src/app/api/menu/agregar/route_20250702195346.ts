@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     const db = client.db(dbName);
     const collection = db.collection('menus');
 
-
+    // Agregar a la subcategoría correspondiente
     const result = await collection.updateOne(
       {},
       { $push: { [`${tipo}.${categoria}`]: productoConId } }
@@ -32,10 +32,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      updated: result.modifiedCount,
+      id: productoConId._id,
       mensaje: 'Producto agregado correctamente',
     });
-    
   } catch (error) {
     console.error('Error al agregar producto:', error);
     return NextResponse.json({ error: 'Error al agregar producto' }, { status: 500 });

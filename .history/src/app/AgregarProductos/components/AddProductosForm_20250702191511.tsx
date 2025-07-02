@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Producto } from "@/types/productos";
+
 import Swal from "sweetalert2";
 import useCategorias from "../../../../hooks/useCategorias";
 import logo from "../../../../public/Assets/4-soles-logo.jpg";
@@ -17,7 +18,6 @@ import BuscadorYLista from "./BuscadorYLista";
 
 export default function AddProductosForm() {
   const [modo, setModo] = useState<"agregar" | "editar">("agregar");
-
   const [nombre, setNombre] = useState("");
   const [precio, setPrecio] = useState("");
   const [tipo, setTipo] = useState("comidas");
@@ -27,6 +27,7 @@ export default function AddProductosForm() {
   const [imagenURL, setImagenURL] = useState<string>("");
 
   const [productos, setProductos] = useState<Producto[]>([]);
+  const [productoId, setProductoId] = useState<string | null>(null);
   const [productoSeleccionadoId, setProductoSeleccionadoId] = useState("");
   const { categoriasComida, categoriasHelado } = useCategorias();
 
@@ -37,86 +38,59 @@ export default function AddProductosForm() {
       setPreviewURL(URL.createObjectURL(file));
     }
   };
-
   useEffect(() => {
     if (modo === "editar") {
       fetch(`/api/menu/listar?tipo=${tipo}`)
         .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data)) {
-            setProductos(data);
-          } else {
-            console.warn("Respuesta inválida:", data);
-            setProductos([]);
-          }
-        });
+        .then((data) => setProductos(data));
     }
   }, [modo, tipo]);
-
   const handleSubmit = async () => {
-    if (!nombre || !precio || !categoria || (modo === "agregar" && !imagen)) {
+    if (!nombre || !precio || !categoria || !imagen) {
       Swal.fire("Completa todos los campos", "", "warning");
       return;
     }
 
     try {
-      let urlFinal = previewURL;
+      const formData = new FormData();
+      formData.append("file", imagen);
 
-      if (imagen) {
-        const formData = new FormData();
-        formData.append("file", imagen);
+      const uploadRes = await fetch("/api/menu/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-        const uploadRes = await fetch("/api/menu/upload", {
-          method: "POST",
-          body: formData,
-        });
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok) throw new Error(uploadData.error || "Falló la subida");
 
-        const uploadData = await uploadRes.json();
-        if (!uploadRes.ok)
-          throw new Error(uploadData.error || "Falló la subida");
-
-        urlFinal = uploadData.url;
-        setImagenURL(urlFinal);
-      }
+      const urlFinal = uploadData.url;
+      setImagenURL(urlFinal);
 
       const res = await fetch(
-        modo === "agregar" ? "/api/menu/agregar" : "/api/menu/editar",
+        modo === "agregar" ? "/api/menu/agregar" : `/api/menu/editar`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            id: productoSeleccionadoId, // ⚠️ <=== ESTO FALTABA
+            id: productoId, // ← para saber cuál editar
             tipo,
             categoria,
-            producto: {
-              nombre,
-              precio: Number(precio),
-              imagen: urlFinal,
-              categoria,
-            },
+            producto: { nombre, precio: Number(precio), imagen: urlFinal },
           }),
         }
       );
 
       const data = await res.json();
       if (res.ok) {
-        Swal.fire(
-          modo === "agregar" ? "Producto agregado" : "Producto editado",
-          "",
-          "success"
-        );
+        Swal.fire("Producto agregado", "", "success");
         setNombre("");
         setPrecio("");
         setCategoria("");
         setImagen(null);
         setPreviewURL("");
         setImagenURL("");
-        setProductoSeleccionadoId("");
-        fetch(`/api/menu/listar?tipo=${tipo}`)
-          .then((res) => res.json())
-          .then((data) => setProductos(data));
       } else {
-        Swal.fire(data.error || "Error en la operación", "", "error");
+        Swal.fire(data.error || "Error al agregar", "", "error");
       }
     } catch (err) {
       console.error("Error submit:", err);
@@ -182,25 +156,13 @@ export default function AddProductosForm() {
             <BuscadorYLista
               productos={productos}
               onSelect={(producto) => {
-                console.log("Producto seleccionado:", producto);
-                setProductoSeleccionadoId(producto._id); // ✅ Este es el ID que falta
+                setProductoSeleccionadoId(producto._id);
+                setProductoId(producto._id);
                 setNombre(producto.nombre);
                 setPrecio(producto.precio.toString());
                 setCategoria(producto.categoria);
                 setPreviewURL(producto.imagen);
-              }}
-              onDeleteSelected={async (ids) => {
-                await fetch("/api/menu/eliminar", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ ids, tipo, categoria }),
-                });
-
-                Swal.fire("Productos eliminados", "", "success");
-
-                fetch(`/api/menu/listar?tipo=${tipo}`)
-                  .then((res) => res.json())
-                  .then((data) => setProductos(data));
+                // podrías guardar también el ID si luego vas a editar
               }}
             />
 
