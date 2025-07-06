@@ -9,7 +9,6 @@ import UserDropdown from "../components/ui/UserDropdown";
 import AbrirCaja from "../components/ui/AbrirCaja";
 import { db } from "@/lib/firebase";
 import { onValue, ref, remove } from "firebase/database";
-import Image from "next/image";
 
 export default function ScreenHome() {
   const { user } = useAuth();
@@ -33,38 +32,27 @@ export default function ScreenHome() {
 
       return () => {
         window.removeEventListener("abrirCaja", handleAbrirCaja);
+        unsubscribe();
       };
     }
   }, [user]);
 
   return (
     <PrivateRoute>
-      <main className="min-h-screen relative bg-[#8e1f1f] p-6 text-white flex flex-col">
-        {/* Imagen centrada */}
-        <div className="absolute inset-0 flex items-center justify-center z-0">
-          <Image
-            src="/Assets/4-soles-logo.jpg"
-            alt="4Soles Logo"
-            width={500}
-            height={500}
-            className="opacity-30 rounded-full "
-          />
+      <main className="min-h-screen bg-gradient-to-br from-red-600 via-black to-blue-950 p-6 text-white flex flex-col">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-lg font-semibold">
+            Bienvenido {user?.nombreCompleto} - {fecha}
+          </h2>
+          <UserDropdown onAbrirCaja={() => setMostrarModal(true)} />
         </div>
-        <div className="relative z-10">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-lg font-semibold">
-              Bienvenido {user?.nombreCompleto} - {fecha}
-            </h2>
-            <UserDropdown onAbrirCaja={() => setMostrarModal(true)} />
-          </div>
 
-          <div className="flex flex-col lg:flex-row items-center justify-center gap-16 flex-grow mt-52">
-            <Suspense
-              fallback={<p className="text-gray-400">Cargando menú...</p>}
-            >
-              <BotonesMenu />
-            </Suspense>
-          </div>
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-16 flex-grow">
+          <Suspense
+            fallback={<p className="text-gray-400">Cargando menú...</p>}
+          >
+            <BotonesMenu />
+          </Suspense>
         </div>
 
         <AbrirCaja

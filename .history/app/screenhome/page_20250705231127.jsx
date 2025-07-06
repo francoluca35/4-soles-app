@@ -1,0 +1,115 @@
+"use client";
+
+import { useState, useEffect, Suspense } from "react";
+import PrivateRoute from "../models/PrivateRoute";
+import { useAuth } from "@/context/AuthContext";
+import TablaMetrica from "../components/ui/TablaMetrica";
+import BotonesMenu from "../components/ui/BotonesMenu";
+import UserDropdown from "../components/ui/UserDropdown";
+import AbrirCaja from "../components/ui/AbrirCaja";
+import { db } from "@/lib/firebase";
+import { onValue, ref, remove } from "firebase/database";
+
+export default function ScreenHome() {
+  const { user } = useAuth();
+  const fecha = new Date().toLocaleDateString("es-AR");
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const [ticketsPendientes, setTicketsPendientes] = useState([]);
+
+  useEffect(() => {
+    if (user?.rol === "admin") {
+      const mostrarAlIniciar = sessionStorage.getItem("mostrarCaja");
+
+      if (mostrarAlIniciar === "true") {
+        setMostrarModal(true);
+        sessionStorage.removeItem("mostrarCaja");
+      }
+
+      const handleAbrirCaja = () => {
+        setMostrarModal(true);
+      };
+
+      window.addEventListener("abrirCaja", handleAbrirCaja);
+
+      const ticketsRef = ref(db, "tickets");
+      const unsubscribe = onValue(ticketsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        const ticketsPend = [];
+
+        Object.entries(data).forEach(([mesa, ticket]) => {
+          if (ticket.estado === "pendiente") {
+            const tiempo = new Date(ticket.hora);
+            const ahora = new Date();
+            const diferenciaMinutos = (ahora - tiempo) / 60000;
+
+            ticketsPend.push({ ...ticket, mesa });
+
+            if (diferenciaMinutos > 3) {
+              alert(
+                `⚠️ ¡Hace más de 3 minutos que la Mesa ${mesa} pagó! Imprimí el ticket.`
+              );
+            }
+          }
+        });
+
+        setTicketsPendientes(ticketsPend);
+      });
+
+      return () => {
+        window.removeEventListener("abrirCaja", handleAbrirCaja);
+        unsubscribe();
+      };
+    }
+  }, [user]);
+
+  const imprimirTicket = async (ticket) => {
+    const fecha = new Date().toLocaleDateString("es-AR");
+    const hora = new Date().toLocaleTimeString("es-AR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "America/Argentina/Buenos_Aires",
+    });
+
+    const orden = Date.now();
+    const { mesa, productos, metodo } = ticket;
+
+    const subtotal = productos.reduce(
+      (acc, p) => acc + p.precio * p.cantidad,
+      0
+    );
+    const descuento = productos.reduce(
+      (acc, p) => acc + (p.descuento || 0) * p.cantidad,
+      0
+    );
+    const totalFinal = subtotal - descuento;
+  };
+
+  return (
+    <PrivateRoute>
+      <main className="min-h-screen bg-gradient-to-br from-red-600 via-black to-blue-950 p-6 text-white flex flex-col">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-lg font-semibold">
+            Bienvenido {user?.nombreCompleto} - {fecha}
+          </h2>
+          <UserDropdown onAbrirCaja={() => setMostrarModal(true)} />
+        </div>
+
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-16 flex-grow">
+          <Suspense
+            fallback={<p className="text-gray-400">Cargando menú...</p>}
+          >
+            <BotonesMenu />
+          </Suspense>
+        </div>
+
+        <AbrirCaja
+          visible={mostrarModal}
+          onClose={() => setMostrarModal(false)}
+        />
+      </main>
+    </PrivateRoute>
+  );
+}

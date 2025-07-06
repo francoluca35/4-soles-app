@@ -33,6 +33,7 @@ export default function ScreenHome() {
 
       return () => {
         window.removeEventListener("abrirCaja", handleAbrirCaja);
+        unsubscribe();
       };
     }
   }, [user]);
@@ -58,7 +59,7 @@ export default function ScreenHome() {
             <UserDropdown onAbrirCaja={() => setMostrarModal(true)} />
           </div>
 
-          <div className="flex flex-col lg:flex-row items-center justify-center gap-16 flex-grow mt-52">
+          <div className="flex flex-col lg:flex-row items-center justify-center gap-16 flex-grow mt-36">
             <Suspense
               fallback={<p className="text-gray-400">Cargando menú...</p>}
             >

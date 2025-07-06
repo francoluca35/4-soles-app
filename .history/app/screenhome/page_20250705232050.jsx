@@ -33,6 +33,7 @@ export default function ScreenHome() {
 
       return () => {
         window.removeEventListener("abrirCaja", handleAbrirCaja);
+        unsubscribe();
       };
     }
   }, [user]);
@@ -43,11 +44,10 @@ export default function ScreenHome() {
         {/* Imagen centrada */}
         <div className="absolute inset-0 flex items-center justify-center z-0">
           <Image
-            src="/Assets/4-soles-logo.jpg"
+            width={10}
+            src="Assets/4-soles-logo.jpg"
             alt="4Soles Logo"
-            width={500}
-            height={500}
-            className="opacity-30 rounded-full "
+            className="  opacity-30 rounded-full"
           />
         </div>
         <div className="relative z-10">
@@ -58,7 +58,7 @@ export default function ScreenHome() {
             <UserDropdown onAbrirCaja={() => setMostrarModal(true)} />
           </div>
 
-          <div className="flex flex-col lg:flex-row items-center justify-center gap-16 flex-grow mt-52">
+          <div className="flex flex-col lg:flex-row items-center justify-center gap-16 flex-grow mt-32">
             <Suspense
               fallback={<p className="text-gray-400">Cargando menú...</p>}
             >

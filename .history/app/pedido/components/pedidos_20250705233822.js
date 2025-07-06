@@ -10,32 +10,33 @@ export default function Pedidos() {
   const [modoPedido, setModoPedido] = useState("delivery");
 
   return (
-    <div className="min-h-screen relative bg-[#8e1f1f] text-white px-4 py-8 flex items-center justify-center">
-      {/* Fondo con logo */}
+    <div className="min-h-screen relative bg-[#8e1f1f] text-white px-4 py-12 flex items-center justify-center">
+      {/* Fondo con imagen centrada */}
       <div className="absolute inset-0 flex items-center justify-center z-0">
         <Image
-          src="/Assets/4-soles-logo.jpg"
+          src="/Assets/4-solees-logo.jpg"
           alt="4Soles Logo"
-          width={300}
-          height={300}
-          className="opacity-20"
+          width={256}
+          height={256}
+          className="opacity-30"
         />
       </div>
 
-      <div className="relative z-10 w-full max-w-7xl">
-        <div className="mb-4">
+      <div className="relative z-10 w-full max-w-4xl rounded-3xl bg-transparent backdrop-blur-lg border border-white/10 shadow-2xl p-8">
+        <div className="mb-6">
           <BackArrow label="Volver al panel" />
         </div>
 
-        <h2 className="text-center text-2xl font-bold text-white mb-6">
-          🍽 Pedidos / {modoPedido === "delivery" ? "Delivery" : "Restaurante"}
+        <h2 className="text-4xl font-bold text-white mb-8 text-center">
+          🍽 Nuevo Pedido
         </h2>
 
-        <div className="flex justify-center gap-4 mb-10">
+        {/* Botones de selección */}
+        <div className="flex justify-center mb-8 gap-4">
           <button
             className={`px-6 py-3 rounded-xl font-semibold ${
               modoPedido === "delivery" ? "bg-orange-500" : "bg-white/10"
-            }`}
+            } transition`}
             onClick={() => setModoPedido("delivery")}
           >
             Delivery
@@ -43,17 +44,15 @@ export default function Pedidos() {
           <button
             className={`px-6 py-3 rounded-xl font-semibold ${
               modoPedido === "restaurante" ? "bg-orange-500" : "bg-white/10"
-            }`}
+            } transition`}
             onClick={() => setModoPedido("restaurante")}
           >
             Restaurante
           </button>
         </div>
 
-        {/* Formulario según modo */}
-        <div className="relative">
-          {modoPedido === "delivery" ? <DeliveryForm /> : <RestauranteForm />}
-        </div>
+        {/* Renderizamos el formulario correspondiente */}
+        {modoPedido === "delivery" ? <DeliveryForm /> : <RestauranteForm />}
       </div>
     </div>
   );

@@ -1,18 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FiPlusCircle, FiTrash2, FiFilter } from "react-icons/fi";
+import useProductos from "@/app/hooks/useProductos";
+import { FiPlusCircle, FiTrash2 } from "react-icons/fi";
 import Swal from "sweetalert2";
 import QRCode from "react-qr-code";
 import Image from "next/image";
-import useProductos from "@/app/hooks/useProductos";
-import SelectorCategorias from "./SelectorCategorias";
-import SelectorSubcategorias from "./SelectorSubCategorias";
 
 export default function DeliveryForm() {
   const { productos } = useProductos();
-  const [tipoActual, setTipoActual] = useState("comida");
-  const [phone, setPhone] = useState("");
+
   const [nombre, setNombre] = useState("");
   const [direccion, setDireccion] = useState("");
   const [observacion, setObservacion] = useState("");
@@ -24,21 +21,10 @@ export default function DeliveryForm() {
   const [externalReference, setExternalReference] = useState("");
   const [presupuesto, setPresupuesto] = useState([]);
   const [mostrarDropdown, setMostrarDropdown] = useState(false);
-  const [subcategoriasFiltradas, setSubcategoriasFiltradas] = useState([]);
-  const [mostrarSubcategorias, setMostrarSubcategorias] = useState(false);
 
-  const productosFiltrados = productos
-    .filter((p) =>
-      tipoActual === "comida"
-        ? p.tipo === "comida" || p.tipo === "bebida"
-        : p.tipo === "helado"
-    )
-    .filter(
-      (p) =>
-        subcategoriasFiltradas.length === 0 ||
-        subcategoriasFiltradas.includes(p.categoria?.toLowerCase())
-    )
-    .filter((p) => p.nombre.toLowerCase().includes(busqueda.toLowerCase()));
+  const productosFiltrados = productos.filter((p) =>
+    p.nombre.toLowerCase().includes(busqueda.toLowerCase())
+  );
 
   const agregarProducto = () => {
     if (!productoSeleccionado || cantidad < 1) return;
@@ -84,7 +70,6 @@ export default function DeliveryForm() {
       modoPedido: "delivery",
       tipo: "delivery",
       nombre,
-      phone,
       direccion,
       observacion,
       formaDePago: pago,
@@ -116,7 +101,6 @@ export default function DeliveryForm() {
   };
 
   const resetFormulario = () => {
-    setPhone("");
     setNombre("");
     setDireccion("");
     setObservacion("");
@@ -132,38 +116,17 @@ export default function DeliveryForm() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
       {/* Columna izquierda */}
-      <div className="bg-neutral-900/70 p-4 rounded-xl space-y-4">
-        <div className="relative">
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              placeholder="Buscar Producto"
-              value={busqueda}
-              onChange={(e) => {
-                setBusqueda(e.target.value);
-                setMostrarDropdown(true);
-              }}
-              className="w-full px-4 py-2 bg-white/10 text-white rounded-full"
-            />
-            <button
-              onClick={() => setMostrarSubcategorias(!mostrarSubcategorias)}
-              className="text-white hover:text-orange-400"
-              title="Filtrar por subcategorías"
-            >
-              <FiFilter size={22} />
-            </button>
-          </div>
-
-          {mostrarSubcategorias && (
-            <div className="mt-3">
-              <SelectorSubcategorias
-                tipoActual={tipoActual}
-                onChange={(subcats) => setSubcategoriasFiltradas(subcats)}
-              />
-            </div>
-          )}
-        </div>
-
+      <div className="bg-neutral-900 p-4 rounded-xl space-y-4">
+        <input
+          type="text"
+          placeholder="Buscar Producto"
+          value={busqueda}
+          onChange={(e) => {
+            setBusqueda(e.target.value);
+            setMostrarDropdown(true);
+          }}
+          className="w-full px-4 py-2 bg-white/10 text-white rounded-xl"
+        />
         {mostrarDropdown && productosFiltrados.length > 0 && (
           <ul className="bg-white text-black rounded-xl shadow-md max-h-40 overflow-y-auto">
             {productosFiltrados.map((p) => (
@@ -221,17 +184,24 @@ export default function DeliveryForm() {
       </div>
 
       {/* Columna central */}
-      <SelectorCategorias onChange={(tipo) => setTipoActual(tipo)} />
+      <div className="flex flex-col items-center justify-center space-y-6">
+        <button className="bg-yellow-400 text-black font-bold px-6 py-3 rounded-xl shadow-lg">
+          Helados
+        </button>
+        <Image
+          src="/Assets/4-soles-logo.jpg"
+          alt="Logo"
+          width={200}
+          height={200}
+          className="opacity-40 rounded-full"
+        />
+        <button className="bg-white text-black font-bold px-6 py-3 rounded-xl shadow-lg">
+          Comidas
+        </button>
+      </div>
 
       {/* Columna derecha */}
-      <div className="bg-neutral-900/70 p-4 rounded-xl space-y-4">
-        <input
-          type="number"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="Numero de telefono"
-          className="w-full px-4 py-2 bg-white/10 text-white rounded-xl"
-        />
+      <div className="bg-neutral-900 p-4 rounded-xl space-y-4">
         <input
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}

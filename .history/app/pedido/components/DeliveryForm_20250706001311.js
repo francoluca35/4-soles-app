@@ -132,7 +132,7 @@ export default function DeliveryForm() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
       {/* Columna izquierda */}
-      <div className="bg-neutral-900/70 p-4 rounded-xl space-y-4">
+      <div className="bg-neutral-900/40 p-4 rounded-xl space-y-4">
         <div className="relative">
           <div className="flex items-center gap-2">
             <input
@@ -224,9 +224,8 @@ export default function DeliveryForm() {
       <SelectorCategorias onChange={(tipo) => setTipoActual(tipo)} />
 
       {/* Columna derecha */}
-      <div className="bg-neutral-900/70 p-4 rounded-xl space-y-4">
+      <div className="bg-neutral-900 p-4 rounded-xl space-y-4">
         <input
-          type="number"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="Numero de telefono"
