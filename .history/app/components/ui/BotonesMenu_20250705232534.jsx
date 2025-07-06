@@ -50,7 +50,7 @@ export default function BotonesMenu() {
         {botonesFiltrados.map((btn, i) => (
           <div
             key={i}
-            className="bg-white/80 hover:bg-slate-800/60  text-black hover:text-white rounded-lg p-6 w-36 h-28 flex flex-col items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer"
+            className="bg-white/80 hover:bg-slate-800/40  text-black rounded-lg p-6 w-36 h-28 flex flex-col items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer"
             onClick={() => router.push(btn.ruta)}
           >
             <div className="mb-2">{btn.icono}</div>

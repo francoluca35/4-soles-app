@@ -226,7 +226,6 @@ export default function DeliveryForm() {
       {/* Columna derecha */}
       <div className="bg-neutral-900/70 p-4 rounded-xl space-y-4">
         <input
-          type="number"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="Numero de telefono"

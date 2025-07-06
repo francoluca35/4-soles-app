@@ -33,6 +33,7 @@ export default function ScreenHome() {
 
       return () => {
         window.removeEventListener("abrirCaja", handleAbrirCaja);
+        unsubscribe();
       };
     }
   }, [user]);
