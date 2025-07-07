@@ -244,7 +244,7 @@ export default function DeliveryForm() {
           placeholder="Nombre Completo"
           className="w-full px-4 py-2 bg-white/10 text-white rounded-xl"
         />
-        <div className="flex items-center gap-4 justify-center text-white">
+        <div className="flex items-center gap-4 text-white">
           <label className="flex items-center gap-2">
             <input
               type="radio"
@@ -255,7 +255,7 @@ export default function DeliveryForm() {
             />
             Delivery
           </label>
-          <label className="flex items-center gap-2 ">
+          <label className="flex items-center gap-2 content-center">
             <input
               type="radio"
               name="modoEntrega"

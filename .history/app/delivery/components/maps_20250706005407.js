@@ -125,8 +125,8 @@ export default function Maps() {
           )}</span></div>
           <hr />
           <div class="footer">
-            <h1>Tel: 1131199882</h1>
-            <h1>Dirección: .....</h1>
+            <h1>Tel: 1140660136</h1>
+            <h1>Dirección: Rivera 2495 V. Celina</h1>
             <h1>Gracias por su visita!</h1>
           </div>
           <script>window.onload = function() { window.print(); setTimeout(()=>window.close(), 500); }</script>
@@ -212,7 +212,7 @@ export default function Maps() {
               ? "Todos"
               : t === "delivery"
               ? "Delivery"
-              : "Retiro en local"}
+              : "Para llevar"}
           </button>
         ))}
       </div>

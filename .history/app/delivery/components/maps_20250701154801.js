@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import useMaps from "@/app/hooks/useMaps";
-import useProductos from "@/app/hooks/useProductos";
 import BackArrow from "@/app/components/ui/BackArrow";
+import useProductos from "@/app/hooks/useProductos";
 
 export default function Maps() {
   const { pedidos, loading, refetch } = useMaps();
@@ -12,9 +12,6 @@ export default function Maps() {
   const [detalle, setDetalle] = useState(null);
   const [enviandoId, setEnviandoId] = useState(null);
   const [filtro, setFiltro] = useState("todos");
-
-  const [mostrarPago, setMostrarPago] = useState(null);
-  const [modalPago, setModalPago] = useState(null);
 
   const imprimirTicketPOS = (pedido) => {
     const fecha = new Date().toLocaleDateString("es-AR");
@@ -27,6 +24,7 @@ export default function Maps() {
 
     const orden = Date.now();
     const encabezado = pedido.tipo === "delivery" ? "DELIVERY" : "PARA LLEVAR";
+
     let subtotal = 0;
 
     const productosHTML = pedido.comidas
@@ -125,8 +123,8 @@ export default function Maps() {
           )}</span></div>
           <hr />
           <div class="footer">
-            <h1>Tel: 1131199882</h1>
-            <h1>Dirección: .....</h1>
+            <h1>Tel: 1140660136</h1>
+            <h1>Dirección: Rivera 2495 V. Celina</h1>
             <h1>Gracias por su visita!</h1>
           </div>
           <script>window.onload = function() { window.print(); setTimeout(()=>window.close(), 500); }</script>
@@ -141,12 +139,11 @@ export default function Maps() {
     }
   };
 
-  const handleEnviar = (pedido) => {
-    setMostrarPago(pedido._id);
-  };
-
-  const procesarPago = async (pedido, metodo) => {
+  const handleEnviar = async (pedido) => {
     setEnviandoId(pedido._id);
+
+    imprimirTicketPOS(pedido);
+
     try {
       const nuevoEstado =
         pedido.tipo === "delivery" ? "en camino" : "entregado";
@@ -157,14 +154,13 @@ export default function Maps() {
         body: JSON.stringify({ id: pedido._id, nuevoEstado }),
       });
 
-      if (pedido.tipo === "entregalocal" && metodo === "efectivo") {
+      if (pedido.tipo === "entregalocal") {
         await fetch("/api/caja-registradora", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ monto: pedido.total }),
         });
       }
-
       await fetch("/api/informe-diario", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -177,11 +173,9 @@ export default function Maps() {
       imprimirTicketPOS(pedido);
       await refetch();
     } catch (err) {
-      console.error("Error al procesar el pago:", err);
+      console.error("Error al enviar:", err);
     } finally {
       setEnviandoId(null);
-      setMostrarPago(null);
-      setModalPago(null);
     }
   };
 
@@ -200,21 +194,30 @@ export default function Maps() {
       </div>
 
       <div className="flex gap-4 mb-6">
-        {["todos", "delivery", "entregalocal"].map((t) => (
-          <button
-            key={t}
-            onClick={() => setFiltro(t)}
-            className={`px-4 py-2 rounded-xl ${
-              filtro === t ? "bg-cyan-600" : "bg-white/10"
-            } text-white`}
-          >
-            {t === "todos"
-              ? "Todos"
-              : t === "delivery"
-              ? "Delivery"
-              : "Retiro en local"}
-          </button>
-        ))}
+        <button
+          onClick={() => setFiltro("todos")}
+          className={`px-4 py-2 rounded-xl ${
+            filtro === "todos" ? "bg-cyan-600" : "bg-white/10"
+          } text-white`}
+        >
+          Todos
+        </button>
+        <button
+          onClick={() => setFiltro("delivery")}
+          className={`px-4 py-2 rounded-xl ${
+            filtro === "delivery" ? "bg-cyan-600" : "bg-white/10"
+          } text-white`}
+        >
+          Delivery
+        </button>
+        <button
+          onClick={() => setFiltro("entregalocal")}
+          className={`px-4 py-2 rounded-xl ${
+            filtro === "entregalocal" ? "bg-cyan-600" : "bg-white/10"
+          } text-white`}
+        >
+          Para llevar
+        </button>
       </div>
 
       <div className="w-full max-w-4xl rounded-3xl bg-white/5 backdrop-blur-lg border border-white/10 shadow-2xl p-6">
@@ -253,28 +256,19 @@ export default function Maps() {
               </div>
 
               <div className="flex gap-2 mt-4 md:mt-0">
-                {mostrarPago === pedido._id ? (
-                  <button
-                    onClick={() => setModalPago(pedido)}
-                    className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-sm font-semibold"
-                  >
-                    Pagar
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleEnviar(pedido)}
-                    disabled={
-                      pedido.estado !== "en curso" || enviandoId === pedido._id
-                    }
-                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
-                      pedido.estado === "en curso"
-                        ? "bg-green-600 hover:bg-green-700"
-                        : "bg-gray-500 cursor-not-allowed"
-                    }`}
-                  >
-                    {pedido.tipo === "delivery" ? "Enviar" : "Entregar"}
-                  </button>
-                )}
+                <button
+                  onClick={() => handleEnviar(pedido)}
+                  disabled={
+                    pedido.estado !== "en curso" || enviandoId === pedido._id
+                  }
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
+                    pedido.estado === "en curso"
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "bg-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  {pedido.tipo === "delivery" ? "Enviar" : "Entregar"}
+                </button>
 
                 <button
                   onClick={() => setDetalle(pedido)}
@@ -321,6 +315,7 @@ export default function Maps() {
                 <strong>📝 Observación:</strong>{" "}
                 {detalle.observacion || "Ninguna"}
               </p>
+
               <div>
                 <strong>🍽 Pedido:</strong>
                 <ul className="list-disc list-inside mt-1">
@@ -334,6 +329,7 @@ export default function Maps() {
                   ))}
                 </ul>
               </div>
+
               {detalle.tipo === "delivery" && (
                 <div className="mt-3">
                   <a
@@ -346,34 +342,6 @@ export default function Maps() {
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      )}
-
-      {modalPago && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-white text-black p-6 rounded-xl max-w-sm w-full text-center">
-            <h2 className="text-xl font-bold mb-4">¿Con qué desea pagar?</h2>
-            <div className="flex justify-around gap-4">
-              <button
-                onClick={() => procesarPago(modalPago, "efectivo")}
-                className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-xl text-white"
-              >
-                Efectivo
-              </button>
-              <button
-                onClick={() => procesarPago(modalPago, "mercado_pago")}
-                className="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-white"
-              >
-                Mercado Pago
-              </button>
-            </div>
-            <button
-              onClick={() => setModalPago(null)}
-              className="mt-4 text-red-600 hover:underline"
-            >
-              Cancelar
-            </button>
           </div>
         </div>
       )}

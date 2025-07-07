@@ -15,8 +15,6 @@ export default function DeliveryForm() {
   const [phone, setPhone] = useState("");
   const [nombre, setNombre] = useState("");
   const [direccion, setDireccion] = useState("");
-  const [modoEntrega, setModoEntrega] = useState("delivery"); // o "local"
-
   const [observacion, setObservacion] = useState("");
   const [busqueda, setBusqueda] = useState("");
   const [productoSeleccionado, setProductoSeleccionado] = useState("");
@@ -84,8 +82,7 @@ export default function DeliveryForm() {
 
     const payload = {
       modoPedido: "delivery",
-      tipo: modoEntrega === "delivery" ? "delivery" : "entregalocal",
-
+      tipo: "delivery",
       nombre,
       phone,
       direccion,
@@ -244,37 +241,12 @@ export default function DeliveryForm() {
           placeholder="Nombre Completo"
           className="w-full px-4 py-2 bg-white/10 text-white rounded-xl"
         />
-        <div className="flex items-center gap-4 justify-center text-white">
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="modoEntrega"
-              value="delivery"
-              checked={modoEntrega === "delivery"}
-              onChange={() => setModoEntrega("delivery")}
-            />
-            Delivery
-          </label>
-          <label className="flex items-center gap-2 ">
-            <input
-              type="radio"
-              name="modoEntrega"
-              value="local"
-              checked={modoEntrega === "local"}
-              onChange={() => setModoEntrega("local")}
-            />
-            Para llevar
-          </label>
-        </div>
-        {modoEntrega === "delivery" && (
-          <input
-            value={direccion}
-            onChange={(e) => setDireccion(e.target.value)}
-            placeholder="Dirección"
-            className="w-full px-4 py-2 bg-white/10 text-white rounded-xl"
-          />
-        )}
-
+        <input
+          value={direccion}
+          onChange={(e) => setDireccion(e.target.value)}
+          placeholder="Dirección"
+          className="w-full px-4 py-2 bg-white/10 text-white rounded-xl"
+        />
         <textarea
           value={observacion}
           onChange={(e) => setObservacion(e.target.value)}

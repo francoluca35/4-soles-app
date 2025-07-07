@@ -22,13 +22,13 @@ export default function Pedidos() {
         />
       </div>
 
-      <div className="relative z-10 w-full max-w-7xl mb-20">
+      <div className="relative z-10 w-full max-w-7xl">
         <div className="mb-4">
           <BackArrow label="Volver al panel" />
         </div>
 
         <h2 className="text-center text-2xl font-bold text-white mb-6">
-          🍽 Pedidos
+          🍽 Pedidos / {modoPedido === "delivery" ? "Delivery" : "Restaurante"}
         </h2>
 
         {/* Formulario según modo */}

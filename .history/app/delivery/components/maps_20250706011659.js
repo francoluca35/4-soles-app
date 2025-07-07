@@ -199,24 +199,6 @@ export default function Maps() {
         <BackArrow label="Volver al panel" />
       </div>
 
-      <div className="flex gap-4 mb-6">
-        {["todos", "delivery", "entregalocal"].map((t) => (
-          <button
-            key={t}
-            onClick={() => setFiltro(t)}
-            className={`px-4 py-2 rounded-xl ${
-              filtro === t ? "bg-cyan-600" : "bg-white/10"
-            } text-white`}
-          >
-            {t === "todos"
-              ? "Todos"
-              : t === "delivery"
-              ? "Delivery"
-              : "Retiro en local"}
-          </button>
-        ))}
-      </div>
-
       <div className="w-full max-w-4xl rounded-3xl bg-white/5 backdrop-blur-lg border border-white/10 shadow-2xl p-6">
         <h2 className="text-3xl font-bold text-white mb-8 text-center">
           📍 Pedidos
