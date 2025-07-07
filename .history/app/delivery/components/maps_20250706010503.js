@@ -212,7 +212,7 @@ export default function Maps() {
               ? "Todos"
               : t === "delivery"
               ? "Delivery"
-              : "Retiro en local"}
+              : "Para llevar"}
           </button>
         ))}
       </div>

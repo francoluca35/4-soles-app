@@ -7,7 +7,6 @@ import {
   FaChartBar,
   FaPlus,
   FaCashRegister,
-  FaPersonBooth,
 } from "react-icons/fa";
 
 export default function BotonesMenu() {
@@ -31,9 +30,9 @@ export default function BotonesMenu() {
       ruta: "/addmenu",
     },
     {
-      texto: "H. Clientes",
-      icono: <FaPersonBooth size={24} />,
-      ruta: "/clienthistory",
+      texto: "Retirar Efectivo",
+      icono: <FaCashRegister size={24} />,
+      ruta: "/updatecaja",
     },
   ];
 

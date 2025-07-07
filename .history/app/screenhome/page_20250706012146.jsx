@@ -54,7 +54,6 @@ export default function ScreenHome() {
             <h2 className="text-lg font-semibold">
               Bienvenido {user?.nombreCompleto} - {fecha}
             </h2>
-            <UserDropdown />
           </div>
 
           <div className="flex flex-col lg:flex-row items-center justify-center gap-16 flex-grow mt-52">
@@ -65,11 +64,11 @@ export default function ScreenHome() {
             </Suspense>
           </div>
         </div>
-
         <AbrirCaja
           visible={mostrarModal}
           onClose={() => setMostrarModal(false)}
-        />
+        />{" "}
+        <UserDropdown />
       </main>
     </PrivateRoute>
   );

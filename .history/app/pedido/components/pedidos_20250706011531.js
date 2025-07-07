@@ -22,7 +22,7 @@ export default function Pedidos() {
         />
       </div>
 
-      <div className="relative z-10 w-full max-w-7xl mb-20">
+      <div className="relative z-10 w-full max-w-7xl mb-4">
         <div className="mb-4">
           <BackArrow label="Volver al panel" />
         </div>

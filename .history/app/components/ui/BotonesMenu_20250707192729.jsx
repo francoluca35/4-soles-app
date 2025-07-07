@@ -33,7 +33,7 @@ export default function BotonesMenu() {
     {
       texto: "H. Clientes",
       icono: <FaPersonBooth size={24} />,
-      ruta: "/clienthistory",
+      ruta: "/updatecaja",
     },
   ];
 

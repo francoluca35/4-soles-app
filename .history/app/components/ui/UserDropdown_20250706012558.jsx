@@ -79,7 +79,7 @@ export default function UserDropdown() {
         onMouseLeave={() => setOpen(false)}
         className={`fixed top-0 right-0 h-full w-64 transform ${
           open ? "translate-x-0" : "translate-x-full"
-        } bg-gradient-to-b from-[#2a0f0f] to-[#383b1e] text-white shadow-2xl transition-transform duration-300 ease-in-out p-6 z-50 rounded-l-xl flex flex-col`}
+        } bg-gradient-to-b from-[#2a0f0f] to-[#571616] text-white shadow-2xl transition-transform duration-300 ease-in-out p-6 z-50 rounded-l-xl flex flex-col`}
       >
         <ul className="space-y-4 text-sm flex-1">
           {/* Resto del menú igual */}
