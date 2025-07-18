@@ -4,17 +4,33 @@ import { useState } from "react";
 import useMaps from "@/app/hooks/useMaps";
 import useProductos from "@/app/hooks/useProductos";
 import BackArrow from "@/app/components/ui/BackArrow";
+import Image from "next/image";
 
 export default function Maps() {
   const { pedidos, loading, refetch } = useMaps();
   const { productos } = useProductos();
-
+  const [desde, setDesde] = useState("");
+  const [hasta, setHasta] = useState("");
   const [detalle, setDetalle] = useState(null);
   const [enviandoId, setEnviandoId] = useState(null);
   const [filtro, setFiltro] = useState("todos");
-
   const [mostrarPago, setMostrarPago] = useState(null);
   const [modalPago, setModalPago] = useState(null);
+  const [paginaActual, setPaginaActual] = useState(1);
+  const itemsPorPagina = 10;
+
+  const handleExportarExcel = async () => {
+    if (!desde || !hasta) {
+      alert("Seleccioná ambas fechas");
+      return;
+    }
+
+    const url = `/api/maps/export?desde=${desde}&hasta=${hasta}`;
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Pedidos_${desde}_a_${hasta}.xlsx`;
+    link.click();
+  };
 
   const imprimirTicketPOS = (pedido) => {
     const fecha = new Date().toLocaleDateString("es-AR");
@@ -127,7 +143,7 @@ export default function Maps() {
           <div class="footer">
             <h1>Tel: 1131199882</h1>
             <h1>Dirección: .....</h1>
-            <h1>Gracias por su visita!</h1>
+            <h1>¡Gracias por su visita!</h1>
           </div>
           <script>window.onload = function() { window.print(); setTimeout(()=>window.close(), 500); }</script>
         </body>
@@ -192,191 +208,311 @@ export default function Maps() {
     if (filtro === "todos") return true;
     return pedido.tipo === filtro;
   });
+  const inicio = (paginaActual - 1) * itemsPorPagina;
+  const fin = inicio + itemsPorPagina;
+  const pedidosPag = pedidosFiltrados.slice(inicio, fin);
+  const totalPaginas = Math.ceil(pedidosFiltrados.length / itemsPorPagina);
 
+  const renderizarBotones = () => {
+    const botones = [];
+
+    if (totalPaginas <= 5) {
+      for (let i = 1; i <= totalPaginas; i++) {
+        botones.push(i);
+      }
+    } else {
+      if (paginaActual <= 3) {
+        botones.push(1, 2, 3, 4, 5, "...");
+      } else if (paginaActual >= totalPaginas - 2) {
+        botones.push(
+          "...",
+          totalPaginas - 4,
+          totalPaginas - 3,
+          totalPaginas - 2,
+          totalPaginas - 1,
+          totalPaginas
+        );
+      } else {
+        botones.push(
+          1,
+          "...",
+          paginaActual - 1,
+          paginaActual,
+          paginaActual + 1,
+          "...",
+          totalPaginas
+        );
+      }
+    }
+
+    return botones;
+  };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-600 via-black to-blue-950 text-white px-6 py-12 flex flex-col items-center">
-      <div className="w-full max-w-4xl mb-6">
+    <div className="min-h-screen relative bg-[#8e1f1f] p-6 text-white flex flex-col">
+      <div className="absolute inset-0 flex items-center justify-center z-0">
+        <Image
+          src="/Assets/4-soles-logo.jpg"
+          alt="4Soles Logo"
+          width={500}
+          height={500}
+          className="opacity-30 rounded-full"
+        />
+      </div>
+      <div className="self-start z-10">
         <BackArrow label="Volver al panel" />
       </div>
-
-      <div className="flex gap-4 mb-6">
-        {["todos", "delivery", "entregalocal"].map((t) => (
-          <button
-            key={t}
-            onClick={() => setFiltro(t)}
-            className={`px-4 py-2 rounded-xl ${
-              filtro === t ? "bg-cyan-600" : "bg-white/10"
-            } text-white`}
-          >
-            {t === "todos"
-              ? "Todos"
-              : t === "delivery"
-              ? "Delivery"
-              : "Retiro en local"}
-          </button>
-        ))}
-      </div>
-
-      <div className="w-full max-w-4xl rounded-3xl bg-white/5 backdrop-blur-lg border border-white/10 shadow-2xl p-6">
-        <h2 className="text-3xl font-bold text-white mb-8 text-center">
-          📍 Pedidos
-        </h2>
-
-        <ul className="space-y-4">
-          {pedidosFiltrados.map((pedido) => (
-            <li
-              key={pedido._id}
-              className="bg-white/10 border border-white/10 rounded-xl p-5 shadow-md flex flex-col md:flex-row md:items-center md:justify-between"
-            >
-              <div>
-                <p className="text-lg font-bold">{pedido.nombre}</p>
-                {pedido.direccion && (
-                  <p className="text-sm text-gray-300">{pedido.direccion}</p>
-                )}
-                <p className="text-xs text-gray-400 mb-1">
-                  Fecha: {pedido.fecha}
-                </p>
-                <p className="text-sm text-gray-400 mb-2">
-                  Total: ${pedido.total}
-                </p>
-                <span
-                  className={`inline-block px-2 py-1 text-xs rounded-full font-semibold ${
-                    pedido.estado === "entregado"
-                      ? "bg-green-600"
-                      : pedido.estado === "en camino"
-                      ? "bg-cyan-500"
-                      : "bg-yellow-400"
-                  }`}
+      <div className="flex justify-center mt-24 z-10 relative max-h-screen">
+        <div className="w-full max-w-4xl flex flex-col items-center gap-6">
+          <div className="w-full rounded-3xl bg-white/5 backdrop-blur-lg border border-white/10 shadow-2xl p-6 overflow-y-auto">
+            <h2 className="text-3xl font-bold text-white mb-8 text-center">
+              📍 Pedidos
+            </h2>
+            <div className="flex flex-wrap justify-center gap-4 mb-6">
+              {["todos", "delivery", "entregalocal"].map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setFiltro(t)}
+                  className={`px-4 py-2 rounded-xl ${
+                    filtro === t ? "bg-cyan-600" : "bg-white/10"
+                  } text-white`}
                 >
-                  {pedido.estado.toUpperCase()}
-                </span>
-              </div>
+                  {t === "todos"
+                    ? "Todos"
+                    : t === "delivery"
+                    ? "Delivery"
+                    : "Retiro en local"}
+                </button>
+              ))}
+            </div>
+            <div className="w-full max-w-4xl mb-6 bg-white/10 p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center justify-center">
+              <label className="text-sm">
+                Desde:{" "}
+                <input
+                  type="date"
+                  value={desde}
+                  onChange={(e) => setDesde(e.target.value)}
+                  className="text-white bg-transparent/60 rounded px-2 py-1 ml-1"
+                />
+              </label>
+              <label className="text-sm">
+                Hasta:{" "}
+                <input
+                  type="date"
+                  value={hasta}
+                  onChange={(e) => setHasta(e.target.value)}
+                  className="text-white bg-transparent/60 rounded px-2 py-1 ml-1"
+                />
+              </label>
+              <button
+                onClick={handleExportarExcel}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl"
+              >
+                📥 Descargar Excel
+              </button>
+            </div>
+            <ul className="space-y-4">
+              {pedidosFiltrados.map((pedido) => (
+                <li
+                  key={pedido._id}
+                  className="bg-white/10 border border-white/10 rounded-xl p-5 shadow-md flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="text-lg font-bold">{pedido.nombre}</p>
+                    {pedido.direccion && (
+                      <p className="text-sm text-gray-300">
+                        {pedido.direccion}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-400 mb-1">
+                      Fecha: {pedido.fecha}
+                    </p>
+                    <p className="text-sm text-gray-400 mb-2">
+                      Total: ${pedido.total}
+                    </p>
+                    <span
+                      className={`inline-block px-2 py-1 text-xs rounded-full font-semibold ${
+                        pedido.estado === "entregado"
+                          ? "bg-green-600"
+                          : pedido.estado === "en camino"
+                          ? "bg-cyan-500"
+                          : "bg-yellow-400"
+                      }`}
+                    >
+                      {pedido.estado.toUpperCase()}
+                    </span>
+                  </div>
 
-              <div className="flex gap-2 mt-4 md:mt-0">
-                {mostrarPago === pedido._id ? (
-                  <button
-                    onClick={() => setModalPago(pedido)}
-                    className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-sm font-semibold"
-                  >
-                    Pagar
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-0">
+                    {mostrarPago === pedido._id ? (
+                      <button
+                        onClick={() => setModalPago(pedido)}
+                        className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-sm font-semibold"
+                      >
+                        Pagar
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleEnviar(pedido)}
+                        disabled={
+                          pedido.estado !== "en curso" ||
+                          enviandoId === pedido._id
+                        }
+                        className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
+                          pedido.estado === "en curso"
+                            ? "bg-green-600 hover:bg-green-700"
+                            : "bg-gray-500 cursor-not-allowed"
+                        }`}
+                      >
+                        {pedido.tipo === "delivery" ? "Enviar" : "Entregar"}
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => setDetalle(pedido)}
+                      className="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-xl text-sm font-semibold"
+                    >
+                      Ver info
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="flex justify-center gap-1 mt-6">
+              <button
+                onClick={() => setPaginaActual((prev) => Math.max(prev - 1, 1))}
+                disabled={paginaActual === 1}
+                className="px-3 py-1 rounded-lg bg-white/10 text-white disabled:opacity-40"
+              >
+                ◀
+              </button>
+
+              {renderizarBotones().map((num, i) =>
+                num === "..." ? (
+                  <span key={i} className="px-3 py-1 text-gray-400">
+                    ...
+                  </span>
                 ) : (
                   <button
-                    onClick={() => handleEnviar(pedido)}
-                    disabled={
-                      pedido.estado !== "en curso" || enviandoId === pedido._id
-                    }
-                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
-                      pedido.estado === "en curso"
-                        ? "bg-green-600 hover:bg-green-700"
-                        : "bg-gray-500 cursor-not-allowed"
+                    key={i}
+                    onClick={() => setPaginaActual(num)}
+                    className={`px-3 py-1 rounded-lg ${
+                      paginaActual === num
+                        ? "bg-cyan-600 text-white"
+                        : "bg-white/10 text-gray-200"
                     }`}
                   >
-                    {pedido.tipo === "delivery" ? "Enviar" : "Entregar"}
+                    {num}
                   </button>
-                )}
+                )
+              )}
 
+              <button
+                onClick={() =>
+                  setPaginaActual((prev) => Math.min(prev + 1, totalPaginas))
+                }
+                disabled={paginaActual === totalPaginas}
+                className="px-3 py-1 rounded-lg bg-white/10 text-white disabled:opacity-40"
+              >
+                ▶
+              </button>
+            </div>
+          </div>
+
+          {detalle && (
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+              <div className="bg-white text-black p-6 rounded-2xl max-w-lg w-full shadow-2xl relative">
                 <button
-                  onClick={() => setDetalle(pedido)}
-                  className="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-xl text-sm font-semibold"
+                  onClick={() => setDetalle(null)}
+                  className="absolute top-2 right-3 text-red-500 text-xl font-bold hover:scale-110"
                 >
-                  Ver info
+                  ✕
+                </button>
+
+                <h3 className="text-2xl font-bold mb-4">
+                  📜 Detalle del pedido
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <p>
+                    <strong>👤 Nombre:</strong> {detalle.nombre}
+                  </p>
+                  {detalle.tipo === "delivery" && (
+                    <p>
+                      <strong>📍 Dirección:</strong> {detalle.direccion}
+                    </p>
+                  )}
+                  <p>
+                    <strong>🗓 Fecha:</strong> {detalle.fecha}
+                  </p>
+                  <p>
+                    <strong>💳 Pago:</strong> {detalle.formaDePago}
+                  </p>
+                  <p>
+                    <strong>💰 Total:</strong> ${detalle.total}
+                  </p>
+                  <p>
+                    <strong>📝 Observación:</strong>{" "}
+                    {detalle.observacion || "Ninguna"}
+                  </p>
+                  <div>
+                    <strong>🍽 Pedido:</strong>
+                    <ul className="list-disc list-inside mt-1">
+                      {detalle.comidas.map((item, i) => (
+                        <li key={i}>
+                          {item.comida || item.bebida}
+                          {item.adicionales?.length > 0 && (
+                            <> + {item.adicionales.join(", ")}</>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  {detalle.tipo === "delivery" && (
+                    <div className="mt-3">
+                      <a
+                        href={detalle.mapsLink}
+                        target="_blank"
+                        className="text-blue-500 underline"
+                      >
+                        📍 Ver en Google Maps
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {modalPago && (
+            <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+              <div className="bg-white text-black p-6 rounded-xl max-w-sm w-full text-center">
+                <h2 className="text-xl font-bold mb-4">
+                  ¿Con qué desea pagar?
+                </h2>
+                <div className="flex justify-around gap-4">
+                  <button
+                    onClick={() => procesarPago(modalPago, "efectivo")}
+                    className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-xl text-white"
+                  >
+                    Efectivo
+                  </button>
+                  <button
+                    onClick={() => procesarPago(modalPago, "mercado_pago")}
+                    className="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-white"
+                  >
+                    Mercado Pago
+                  </button>
+                </div>
+                <button
+                  onClick={() => setModalPago(null)}
+                  className="mt-4 text-red-600 hover:underline"
+                >
+                  Cancelar
                 </button>
               </div>
-            </li>
-          ))}
-        </ul>
+            </div>
+          )}
+        </div>
       </div>
-
-      {detalle && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-          <div className="bg-white text-black p-6 rounded-2xl max-w-lg w-full shadow-2xl relative">
-            <button
-              onClick={() => setDetalle(null)}
-              className="absolute top-2 right-3 text-red-500 text-xl font-bold hover:scale-110"
-            >
-              ✕
-            </button>
-
-            <h3 className="text-2xl font-bold mb-4">🧾 Detalle del pedido</h3>
-            <div className="space-y-2 text-sm">
-              <p>
-                <strong>👤 Nombre:</strong> {detalle.nombre}
-              </p>
-              {detalle.tipo === "delivery" && (
-                <p>
-                  <strong>📍 Dirección:</strong> {detalle.direccion}
-                </p>
-              )}
-              <p>
-                <strong>🗓 Fecha:</strong> {detalle.fecha}
-              </p>
-              <p>
-                <strong>💳 Pago:</strong> {detalle.formaDePago}
-              </p>
-              <p>
-                <strong>💰 Total:</strong> ${detalle.total}
-              </p>
-              <p>
-                <strong>📝 Observación:</strong>{" "}
-                {detalle.observacion || "Ninguna"}
-              </p>
-              <div>
-                <strong>🍽 Pedido:</strong>
-                <ul className="list-disc list-inside mt-1">
-                  {detalle.comidas.map((item, i) => (
-                    <li key={i}>
-                      {item.comida || item.bebida}
-                      {item.adicionales?.length > 0 && (
-                        <> + {item.adicionales.join(", ")}</>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              {detalle.tipo === "delivery" && (
-                <div className="mt-3">
-                  <a
-                    href={detalle.mapsLink}
-                    target="_blank"
-                    className="text-blue-500 underline"
-                  >
-                    📍 Ver en Google Maps
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {modalPago && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-white text-black p-6 rounded-xl max-w-sm w-full text-center">
-            <h2 className="text-xl font-bold mb-4">¿Con qué desea pagar?</h2>
-            <div className="flex justify-around gap-4">
-              <button
-                onClick={() => procesarPago(modalPago, "efectivo")}
-                className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-xl text-white"
-              >
-                Efectivo
-              </button>
-              <button
-                onClick={() => procesarPago(modalPago, "mercado_pago")}
-                className="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-white"
-              >
-                Mercado Pago
-              </button>
-            </div>
-            <button
-              onClick={() => setModalPago(null)}
-              className="mt-4 text-red-600 hover:underline"
-            >
-              Cancelar
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
